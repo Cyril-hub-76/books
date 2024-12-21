@@ -37,7 +37,7 @@ exports.login = (req, resp, next) => {
                         userId: user._id,
                         token: jwt.sign({ userId: user._id}, // user is used in encryption to ensure new books are created by the owner
                         "MIIEvQIBADANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQ",
-                        { expiresIn: "48" }
+                        { expiresIn: "48h" }
                         )
                     })
                 }
