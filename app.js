@@ -1,5 +1,14 @@
 const express = require("express");
 
+const mongoose = require("mongoose");
+// api connection to database
+mongoose.connect("mongodb+srv://mongoUser:iysWCCum0vEh2LTB@cluster0.xvtfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", 
+    { useNewUrlParser: true, 
+        useUnifiedTopology: true 
+    })
+    .then(() => console.log("Connected to database! "))
+    .catch(() => console.log("Connexction to database failed !"));
+
 // app creation
 const app = express();
 

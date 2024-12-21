@@ -59,4 +59,7 @@ server.listen(port);
  * 
  * To create the express app we install the express package
  * npm install express --save
+ * 
+ * To handle MongoDb database communication
+ * npm install mongoose
  */
