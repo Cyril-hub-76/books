@@ -14,7 +14,7 @@ exports.signup = (req, resp, next) => {
             password: hash
         });
         user.save()
-        // 201 => create verb
+        // 201 => create status
         .then(() => resp.status(201).json({ message: "user successfully created"}))
         .catch(error => resp.status(400).json({ error }));
     })
