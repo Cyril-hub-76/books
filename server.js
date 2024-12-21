@@ -62,4 +62,13 @@ server.listen(port);
  * 
  * To handle MongoDb database communication
  * npm install mongoose
+ * 
+ * To hash passwords we need bcrypt package
+ * npm install bcrypt
+ * 
+ * To handle errors unique validation we need mongoose-unique-validator
+ * npm install --save mongoose-unique-validator
+ * 
+ * To create & check token for authentication
+ * npm install --save jsonwebtoken
  */

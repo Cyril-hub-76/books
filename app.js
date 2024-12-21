@@ -1,6 +1,9 @@
 const express = require("express");
 
 const mongoose = require("mongoose");
+
+const userRoutes = require("./routes/user");
+
 // api connection to database
 mongoose.connect("mongodb+srv://mongoUser:iysWCCum0vEh2LTB@cluster0.xvtfe.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", 
     { useNewUrlParser: true, 
@@ -11,6 +14,8 @@ mongoose.connect("mongodb+srv://mongoUser:iysWCCum0vEh2LTB@cluster0.xvtfe.mongod
 
 // app creation
 const app = express();
+// allow access to POST request body
+app.use(express.json());
 
 app.use((req, resp, next) => {
     resp.setHeader('Access-Control-Allow-Origin', '*');
@@ -57,4 +62,5 @@ app.use("/api/books", (req, resp, next)=>{
     resp.status(200).json(book);
     next();
 })
+app.use("/api/auth", userRoutes);
 module.exports = app;
