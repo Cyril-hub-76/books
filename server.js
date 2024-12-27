@@ -71,4 +71,7 @@ server.listen(port);
  * 
  * To create & check token for authentication
  * npm install --save jsonwebtoken
+ * 
+ * To upload Pictures we need the multer package
+ * npm install --save multer
  */
