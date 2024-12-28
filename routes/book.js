@@ -7,7 +7,7 @@ const bookCtrl = require("../controllers/book");
 // add book
 router.post("/", auth, multer, bookCtrl.addBook);
 // modify book
-router.put("/:id", auth, bookCtrl.updateBook);
+router.put("/:id", auth, multer ,bookCtrl.updateBook);
 // remove book
 router.delete("/:id", auth, bookCtrl.deleteBook);
 // get specific book

@@ -16,9 +16,21 @@ exports.addBook = (req, resp, next) => {
 
 
 exports.updateBook = (req, resp, next) => {
-    Book.updateOne({_id: req.params.id}, {...resp.body, _id: req.params.id})
-    .then(() => resp.status(200).json({ message : "Book successfully updated"}))
-    .catch(error => resp.status(400).json({ error })) 
+
+    const bookObject = req.file ? {
+        ...JSON.parse(req.body.book),
+        imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
+    } : { ...req.body };
+
+    delete bookObject._userId;
+
+    Book.findOne({_id: req.params.id})
+    .then((book) => {
+        book.userId != req.auth.userId ? resp.status(401).json({message : "No authorized !!!"}) : Book.updateOne({_id: req.params.id}, {...bookObject, _id: req.params.id})
+        .then(() => resp.status(200).json({message: "book successfully updated !"}))
+        .catch(error => resp.status(401).json({error}))
+    })
+    .catch(error => resp.status(400).json({error}))
  };
 
 exports.deleteBook = (req,resp,next) => {
