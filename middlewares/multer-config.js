@@ -6,16 +6,12 @@ const MIME_TYPES = {
     "image/png" : "png",
     "image/webp" : "webp"
 }
-const storage = multer.diskStorage({
-    destination:(req,file, callback) => {
-        callback(null, "images")
-    },
-    // file name generating
-    filename: (req, file, callback) => {
-        const name = file.originalname.split(" ").join("_");
-        const extension = MIME_TYPES[file.mimetype];
-        callback(null, name + Date.now() + "." + extension);
-    }
-});
 
-module.exports = multer({ storage }).single("image");
+const storage = multer.memoryStorage(); // Buffer using
+
+const fileFilter = (req, file, ca) => {
+    const extension = MIME_TYPES[file.mimetype];
+    extension ? ca(null, true) : ca(new Error("Unsupported file type!!"), false);
+    
+}
+module.exports = multer({ storage , fileFilter}).single("image");

@@ -1,20 +1,38 @@
-const { error } = require("console");
 const Book = require("../models/Book");
 const fs = require ("fs");
+const path = require("path");
+const sharp = require("sharp");
+
+
 exports.addBook = (req, resp, next) => {
+
     const bookObject = JSON.parse(req.body.book);
+    
     delete bookObject._id;
     delete bookObject._userId;
-    const book = new Book({
-        ...bookObject,
-        userId: req.auth.userId,
-        imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.filename}`
-    });
-    book.save()
-    .then(() => resp.status(201).json({message: "Picture successfully uploaded"}))
-    .catch(error => resp.status(400).json({error}))
-};
 
+    const filename = `${Date.now()}-${req.file.originalname.split(" ").join("_")}.webp`;
+    const outputPath = path.join("images", filename);
+
+    // Pics compression with sharp
+
+    sharp(req.file.buffer)
+    .resize(200)
+    .webp({ quality: 80 })
+    .toFile(outputPath)
+    .then(()=> {
+        // book generating
+        const book = new Book({
+            ...bookObject,
+            userId: req.auth.userId,
+            imageUrl: `${req.protocol}://${req.get("host")}/images/${filename}`
+
+        });
+        book.save()
+        .then(()=> resp.status(201).json({ messgae: "Book successfully added!"}))
+        .catch(error => resp.status(400).json({error}))
+    })
+}
 
 exports.updateBook = (req, resp, next) => {
 

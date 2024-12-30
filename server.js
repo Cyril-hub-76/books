@@ -53,6 +53,7 @@ server.listen(port);
 
 /**
  * packages needed for this project
+ * ( --save to add to package.json | --force to force install )
  * 
  * To ensure server realtime updating we need the nodemon package
  * npm install -g nodemon
@@ -74,4 +75,7 @@ server.listen(port);
  * 
  * To upload Pictures we need the multer package
  * npm install --save multer
+ * 
+ * To handle pictures compression we install the sharp package
+ * npm install sharp --save
  */
