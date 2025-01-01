@@ -44,15 +44,12 @@ exports.updateBook = (req, resp, next) => {
 
     delete bookObject._userId;
 
-
     Book.findOne({_id: req.params.id})
     .then((book) => {
         if (book.userId != req.auth.userId) {
 
             return resp.status(401).json({message: "Unauthorized!!!"});
-
         }
-
         if (req.file) {
             
             const newFileName = `${Date.now()}-${req.file.originalname.split(" ").join("_").split(".")[0]}.webp`;
@@ -73,7 +70,6 @@ exports.updateBook = (req, resp, next) => {
 
                 updateBook(req.params.id, bookObject, resp);
             })
-
             .catch(error => resp.status(500).json({message: "Pic proccessing failed!!", error}))
         } else {
             updateBook(req.params.id, bookObject, resp);
