@@ -11,13 +11,14 @@ exports.addBook = (req, resp, next) => {
     delete bookObject._id;
     delete bookObject._userId;
 
-    const filename = `${Date.now()}-${req.file.originalname.split(" ").join("_")}.webp`;
+    const filename = `${Date.now()}-${req.file.originalname.split(" ").join("_").split(".")[0]}.webp`;
     const outputPath = path.join("images", filename);
 
     // Pics compression with sharp
 
     sharp(req.file.buffer)
     .resize(200)
+    .toFormat("webp")
     .webp({ quality: 80 })
     .toFile(outputPath)
     .then(()=> {
@@ -43,13 +44,48 @@ exports.updateBook = (req, resp, next) => {
 
     delete bookObject._userId;
 
+
     Book.findOne({_id: req.params.id})
     .then((book) => {
-        book.userId != req.auth.userId ? resp.status(401).json({message : "unauthorized !!!"}) : Book.updateOne({_id: req.params.id}, {...bookObject, _id: req.params.id})
-        .then(() => resp.status(200).json({message: "book successfully updated !"}))
-        .catch(error => resp.status(401).json({error}))
+        if (book.userId != req.auth.userId) {
+
+            return resp.status(401).json({message: "Unauthorized!!!"});
+
+        }
+
+        if (req.file) {
+            
+            const newFileName = `${Date.now()}-${req.file.originalname.split(" ").join("_").split(".")[0]}.webp`;
+            const outputPath = path.join("images", newFileName);
+            sharp(req.file.buffer)
+            .resize(200)
+            .toFormat("webp")
+            .webp({ quality: 80 })
+            .toFile(outputPath)
+            .then(() => {
+                const oldPic = book.imageUrl.split("/images/")[1];
+                
+                fs.unlink(`images/${oldPic}`, (error) => {
+                    if (error) console.error("Failed to delete oldPic!!!", error)
+                });
+                
+                bookObject.imageUrl = `${req.protocol}://${req.get("host")}/images/${newFileName}`;
+
+                updateBook(req.params.id, bookObject, resp);
+            })
+
+            .catch(error => resp.status(500).json({message: "Pic proccessing failed!!", error}))
+        } else {
+            updateBook(req.params.id, bookObject, resp);
+        }
     })
-    .catch(error => resp.status(400).json({error}))
+    .catch(error => resp.status(400).json({error}));
+
+    const updateBook = (id, bookObject, resp) => {
+        Book.updateOne({ _id: id }, { ...bookObject, _id: id })
+            .then(() => resp.status(200).json({ message: "Book successfully updated!" }))
+            .catch((error) => resp.status(400).json({ error }));
+    };
  };
 
 exports.deleteBook = (req,resp,next) => {
