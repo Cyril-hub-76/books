@@ -84,6 +84,44 @@ exports.updateBook = (req, resp, next) => {
     };
  };
 
+exports.rating = (req, resp, next) => {
+
+    delete req.body._id;
+
+    const rating = req.body.rating;
+
+    if(rating < 0 || rating > 5){
+        return resp.status(404).json({messge: "Rating is out of range!!"});
+    }
+
+    Book.findOne({_id: req.params.id})
+    .then((book) => {
+
+        const rateVerificator = book.ratings.find(
+            (rating) => rating.userId === req.auth.userId )
+
+            if(rateVerificator) {
+                return resp.status(404).json({messge: "This user allready rated this book!!"});
+            }
+            const updatedRating = {
+                userId: req.auth.userId,
+                grade: req.body.rating
+            };
+
+            book.ratings.push(updatedRating);
+            const allGrades = book.ratings.map((rating) => rating.grade);
+            book.averageRating = allGrades.length > 0
+            ? parseFloat(allGrades.reduce((acc, grade) => acc + grade, 0) / allGrades.length).toFixed(1)
+            : 0;
+
+            Book.updateOne({ _id: req.params.id}, { ratings: book.ratings, averageRating: book.averageRating})
+
+            .then(()=> resp.status(201).json(book))
+            .catch(error => resp.status(400).json({error}))
+    })
+    .catch(error => resp.status(500).json({ message: "Internal server error", error}))
+};
+
 exports.deleteBook = (req,resp,next) => {
     Book.findOne({_id: req.params.id})
     .then(book => {
