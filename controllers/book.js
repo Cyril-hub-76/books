@@ -150,3 +150,10 @@ exports.getAllBooks = (req, resp, next) => {
     .then(books => resp.status(200).json( books ))
     .catch(error => resp.status(400).json({ error }))
 };
+
+exports.getBestRating = (req, resp, next) => {
+    Book.find()
+    .sort({averageRating: -1}).limit(3)
+    .then((books) => resp.status(201).json(books))
+    .catch(error => resp.status(400).json({error}))
+};
