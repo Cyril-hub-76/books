@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-// verify if user is loged
+
 module.exports = (req, resp, next) => {
     try {
         const token = req.headers.authorization.split(" ")[1];

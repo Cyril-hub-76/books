@@ -48,7 +48,7 @@ exports.updateBook = (req, resp, next) => {
     .then((book) => {
         if (book.userId != req.auth.userId) {
 
-            return resp.status(401).json({message: "Unauthorized!!!"});
+            return resp.status(403).json({message: "Unauthorized request!!!"});
         }
         if (req.file) {
             
@@ -75,7 +75,7 @@ exports.updateBook = (req, resp, next) => {
             updateBook(req.params.id, bookObject, resp);
         }
     })
-    .catch(error => resp.status(400).json({error}));
+    .catch(error => resp.status(404).json({message: "Resource could not be found", error}));
 
     const updateBook = (id, bookObject, resp) => {
         Book.updateOne({ _id: id }, { ...bookObject, _id: id })
@@ -97,27 +97,30 @@ exports.rating = (req, resp, next) => {
     Book.findOne({_id: req.params.id})
     .then((book) => {
 
-        const rateVerificator = book.ratings.find(
-            (rating) => rating.userId === req.auth.userId )
+        const valid = req.auth;
+        if(!valid) {
+            return (error => resp.status(401).json({error}));
+        }
+        const rateVerificator = book.ratings.find((rating) => rating.userId === req.auth.userId )
 
-            if(rateVerificator) {
-                return resp.status(404).json({messge: "This user allready rated this book!!"});
-            }
-            const updatedRating = {
-                userId: req.auth.userId,
-                grade: req.body.rating
-            };
+        if(rateVerificator) {
+            return resp.status(403).json({messge: "This user allready rated this book!!"});
+        }
+        const updatedRating = {
+            userId: req.auth.userId,
+            grade: req.body.rating
+        };
 
-            book.ratings.push(updatedRating);
-            const allGrades = book.ratings.map((rating) => rating.grade);
-            book.averageRating = allGrades.length > 0
-            ? parseFloat(allGrades.reduce((acc, grade) => acc + grade, 0) / allGrades.length).toFixed(1)
-            : 0;
+        book.ratings.push(updatedRating);
+        const allGrades = book.ratings.map((rating) => rating.grade);
 
-            Book.updateOne({ _id: req.params.id}, { ratings: book.ratings, averageRating: book.averageRating})
-
-            .then(()=> resp.status(201).json(book))
-            .catch(error => resp.status(400).json({error}))
+        book.averageRating = allGrades.length > 0
+        ? parseFloat(allGrades.reduce((acc, grade) => acc + grade, 0) / allGrades.length).toFixed(1)
+        : 0;
+        
+        Book.updateOne({ _id: req.params.id}, { ratings: book.ratings, averageRating: book.averageRating})
+        .then(()=> resp.status(201).json(book))
+        .catch(error => resp.status(400).json({error}))
     })
     .catch(error => resp.status(500).json({ message: "Internal server error", error}))
 };
@@ -126,13 +129,13 @@ exports.deleteBook = (req,resp,next) => {
     Book.findOne({_id: req.params.id})
     .then(book => {
         if(book.userId != req.auth.userId) {
-            resp.status(401).json({message: "unauthorized!!!"})
+            resp.status(403).json({message: "unauthorized!!!"})
         } else {
             const filename = book.imageUrl.split("/images/")[1];
             fs.unlink(`images/${filename}`, () => {
                 Book.deleteOne({_id: req.params.id})
                 .then(() => resp.status(200).json({ message: "Book successfully deleted !!!"}))
-                .catch(error => resp.status(401).json({error}))
+                .catch(error => resp.status(404).json({message: "Book not found!" ,error}))
             })
         }
     })
@@ -142,7 +145,7 @@ exports.deleteBook = (req,resp,next) => {
 exports.selectBook = (req,resp,next) => {
     Book.findOne({ _id: req.params.id})
     .then(book => resp.status(200).json(book))
-    .catch(error => resp.status(404).json({ message : "Book not found !"}))
+    .catch(error => resp.status(400).json({ error}))
 };
 
 exports.getAllBooks = (req, resp, next) => {
