@@ -33,6 +33,7 @@ exports.addBook = (req, resp, next) => {
         .then(()=> resp.status(201).json({ messgae: "Book successfully added!"}))
         .catch(error => resp.status(400).json({error}))
     })
+    .catch(error => resp.status(500).json({message: "Book proccessing failed!!", error}))
 }
 
 exports.updateBook = (req, resp, next) => {
@@ -119,7 +120,7 @@ exports.rating = (req, resp, next) => {
         : 0;
         
         Book.updateOne({ _id: req.params.id}, { ratings: book.ratings, averageRating: book.averageRating})
-        .then(()=> resp.status(201).json(book))
+        .then(()=> resp.status(200).json(book))
         .catch(error => resp.status(400).json({error}))
     })
     .catch(error => resp.status(500).json({ message: "Internal server error", error}))
@@ -157,6 +158,6 @@ exports.getAllBooks = (req, resp, next) => {
 exports.getBestRating = (req, resp, next) => {
     Book.find()
     .sort({averageRating: -1}).limit(3)
-    .then((books) => resp.status(201).json(books))
+    .then((books) => resp.status(200).json(books))
     .catch(error => resp.status(400).json({error}))
 };
