@@ -1,5 +1,10 @@
 # ignore modules
 node_modules
 
-# ignore image folder
-images/
+# ignore pictures files
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.avif
+*.gif
